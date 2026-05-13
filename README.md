@@ -25,6 +25,8 @@ O **Voz Ativa** é um assistente de transcrição em tempo real focado em acessi
    
    E-MAIL: projeto.oucapormim@gmail.com
 
+   **"Topics" - react accessibility web-speech-api inclusion education javascript frontend.
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
