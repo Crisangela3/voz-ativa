@@ -10,11 +10,6 @@ const App = () => {
   const [showAjuda, setShowAjuda] = useState(false);
   const [etapaCadastro, setEtapaCadastro] = useState("fechado");
 
-  // --- TRAVA DE SEGURANÇA ---
-  const [codigoAcessoInput, setCodigoAcessoInput] = useState("");
-  const [autorizado, setAutorizado] = useState(false);
-  const CODIGO_CORRETO = import.meta.env.VITE_FREE_ACCESS_CODE;
-
   const [dadosPerfil, setDadosPerfil] = useState({
     nomeAluno: "", cpfRg: "", whatsapp: "", cep: "", endereco: "", bairro: "", cidade: "",
     nomeMae: "", cpfMae: "", whatsappMae: "", nivelEnsino: "Ensino Fundamental I / II",
@@ -31,14 +26,6 @@ const App = () => {
     gold: "#D4AF37",
     branco: "#FFFFFF",
     cinzaTexto: "#333333"
-  };
-
-  const verificarCodigo = () => {
-    if (codigoAcessoInput === CODIGO_CORRETO) {
-      setAutorizado(true);
-    } else {
-      alert("Código de liberação inválido!");
-    }
   };
 
   const gerarPDF = () => {
@@ -71,13 +58,13 @@ const App = () => {
         body: JSON.stringify(dadosPerfil),
       });
       if (response.ok) {
-        alert("Cadastro enviado com sucesso!");
+        alert("Cadastro enviado com sucesso! O código de liberação foi registrado.");
         setEtapaCadastro("fechado");
       } else {
-        alert("Erro ao enviar.");
+        alert("Erro ao enviar o cadastro.");
       }
     } catch (error) {
-      alert("Erro de conexão.");
+      alert("Erro de conexão com o servidor.");
     }
   };
 
@@ -96,7 +83,7 @@ const App = () => {
   const iniciarReconhecimento = () => {
     const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
     if (!SpeechRecognition) {
-      alert("Navegador não suportado. Use o Chrome.");
+      alert("Navegador não suportado. Use o Google Chrome.");
       return;
     }
     const recognition = new SpeechRecognition();
@@ -104,11 +91,10 @@ const App = () => {
     recognition.interimResults = true;
     recognition.lang = 'pt-BR';
 
-    // --- DIAGNÓSTICO PARA O PC DA AMIGA ---
+    // DIAGNÓSTICO PARA O MICROFONE (Caso não funcione no PC da amiga)
     recognition.onerror = (event) => {
-      console.error("Erro:", event.error);
       if (event.error === 'not-allowed') {
-        alert("ERRO: Microfone bloqueado! Clique no CADEADO ao lado da URL e permita o uso.");
+        alert("ATENÇÃO: Microfone bloqueado! Clique no CADEADO lá em cima na barra de endereço e mude para 'Permitir'.");
       } else {
         alert("Erro no microfone: " + event.error);
       }
@@ -134,25 +120,6 @@ const App = () => {
     if (estaGravando) { setEstaGravando(false); encerrarReconhecimento(); }
     else { setEstaGravando(true); iniciarReconhecimento(); }
   };
-
-  // TELA DE BLOQUEIO INICIAL
-  if (!autorizado) {
-    return (
-      <div style={{ backgroundColor: cores.begeFundo, height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <div style={{ backgroundColor: '#fff', padding: '40px', borderRadius: '30px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', textAlign: 'center', width: '400px' }}>
-          <h2 style={{ color: cores.verdeOliva, marginBottom: '20px' }}>Liberação de Acesso</h2>
-          <input 
-            type="password" 
-            placeholder="Digite o código" 
-            style={{ ...inputStyle(cores), backgroundColor: '#f0f0f0', color: '#333', border: '1px solid #ccc' }}
-            value={codigoAcessoInput}
-            onChange={(e) => setCodigoAcessoInput(e.target.value)}
-          />
-          <button onClick={verificarCodigo} style={btnMain(cores)}>ENTRAR NO SISTEMA</button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div style={{ backgroundColor: cores.begeFundo, height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden', position: 'fixed', top: 0, left: 0 }}>
@@ -225,26 +192,7 @@ const App = () => {
           <div style={{ backgroundColor: cores.branco, width: '900px', borderRadius: '45px', padding: '40px', position: 'relative', border: `5px solid ${cores.gold}`, maxHeight: '90vh', overflowY: 'auto' }}>
             <button onClick={() => setShowAjuda(false)} style={closeBtn}>×</button>
             <h2 style={{ color: cores.terraCota, textAlign: 'center', fontSize: '28px', marginBottom: '30px', fontWeight: 'bold' }}>Guia de Uso - Voz Ativa</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
-              <div style={{ color: cores.cinzaTexto, fontSize: '14px', lineHeight: '1.6' }}>
-                <h3 style={{ color: cores.gold, fontSize: '16px', marginBottom: '15px' }}>› FUNCIONAMENTO DOS BOTÕES</h3>
-                <p>💻 <b>Conectar Áudio do Meet:</b> Capture a fala do professor com clareza em aulas online.</p>
-                <p>🎤 <b>Microfone Central:</b> Inicie ou pause a escuta de conversas presenciais.</p>
-                <p>🗑️ <b>Lixeira:</b> Limpa o texto da tela atual.</p>
-                <p>📄 <b>Gerar PDF:</b> Transforma suas anotações em um arquivo para estudo.</p>
-              </div>
-              <div>
-                <h3 style={{ color: cores.gold, fontSize: '16px', marginBottom: '15px' }}>› REGRAS DO CADASTRO (IMPORTANTE)</h3>
-                <div style={{ backgroundColor: cores.begeFundo, padding: '20px', borderRadius: '20px', fontSize: '13px', border: `1px solid ${cores.gold}` }}>
-                    <ul style={{ paddingLeft: '20px', color: cores.cinzaTexto }}>
-                      <li><b>RA do Aluno:</b> Obrigatório número completo mais o dígito.</li>
-                      <li><b>Documentos:</b> CPF e RG devem estar completos.</li>
-                      <li><b>Código:</b> Digite o código recebido por e-mail para liberar todas as funções.</li>
-                    </ul>
-                </div>
-              </div>
-            </div>
-            <button onClick={() => setShowAjuda(false)} style={{ ...btnMain(cores), background: cores.verdeOliva, marginTop: '30px' }}>ENTENDI TUDO E QUERO COMEÇAR!</button>
+            <button onClick={() => setShowAjuda(false)} style={{ ...btnMain(cores), background: cores.verdeOliva, marginTop: '30px' }}>ENTENDI TUDO!</button>
           </div>
         </div>
       )}
@@ -255,15 +203,12 @@ const App = () => {
           <div style={{ backgroundColor: cores.branco, width: '500px', borderRadius: '40px', padding: '50px', position: 'relative', textAlign: 'center' }}>
             <button onClick={() => setEtapaCadastro("fechado")} style={closeBtn}>×</button>
             <h2 style={{ color: cores.terraCota, fontSize: '32px', marginBottom: '35px' }}>Acessar Voz Ativa</h2>
-            <input placeholder="E-mail" style={inputStyle(cores)} />
-            <input type="password" placeholder="Senha" style={inputStyle(cores)} />
-            <button onClick={() => alert("Link enviado!")} style={{ background: 'none', border: 'none', color: cores.terraCota, fontSize: '14px', textDecoration: 'underline', cursor: 'pointer', marginBottom: '20px', display: 'block', width: '100%' }}>Esqueci minha senha</button>
             <button onClick={() => setEtapaCadastro("perfil")} style={btnMain(cores)}>ENTRAR / CADASTRAR NOVO</button>
           </div>
         </div>
       )}
 
-      {/* MODAL PERFIL */}
+      {/* MODAL PERFIL (Cadastro com campo de código) */}
       {etapaCadastro === "perfil" && (
         <div style={modalOverlay}>
           <form onSubmit={enviarParaEmail} style={{ backgroundColor: cores.branco, width: '950px', borderRadius: '45px', padding: '40px', position: 'relative', border: `8px solid ${cores.terraCota}`, maxHeight: '90vh', overflowY: 'auto' }}>
@@ -271,56 +216,21 @@ const App = () => {
             <h2 style={{ color: cores.verdeOliva, textAlign: 'center', fontSize: '28px', marginBottom: '30px', fontWeight: 'bold' }}>Perfil do Usuário</h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <h3 style={{ color: cores.terraCota, fontSize: '16px', borderBottom: `1px solid ${cores.verdeClaro}`, paddingBottom: '5px' }}>👤 DADOS PESSOAIS</h3>
+                <h3 style={{ color: cores.terraCota, fontSize: '16px' }}>👤 DADOS PESSOAIS</h3>
                 <input name="nomeAluno" placeholder="Nome Completo do Aluno" onChange={handleInputChange} style={inputStyle(cores)} required />
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <input name="cpfRg" placeholder="CPF ou RG" onChange={handleInputChange} style={inputStyle(cores)} required />
-                  <input name="whatsapp" placeholder="Celular/WhatsApp" onChange={handleInputChange} style={inputStyle(cores)} required />
-                </div>
-                <input name="cep" placeholder="CEP" onChange={handleInputChange} style={inputStyle(cores)} />
-                <input name="endereco" placeholder="Endereço (Rua e Número)" onChange={handleInputChange} style={inputStyle(cores)} />
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <input name="bairro" placeholder="Bairro" onChange={handleInputChange} style={inputStyle(cores)} />
-                  <input name="cidade" placeholder="Cidade" onChange={handleInputChange} style={inputStyle(cores)} />
-                </div>
-                <h3 style={{ color: cores.terraCota, fontSize: '16px', borderBottom: `1px solid ${cores.verdeClaro}`, paddingBottom: '5px', marginTop: '10px' }}>👩‍👦 RESPONSÁVEL (MÃE)</h3>
-                <input name="nomeMae" placeholder="Nome Completo da Mãe" onChange={handleInputChange} style={inputStyle(cores)} />
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <input name="cpfMae" placeholder="CPF/RG da Mãe" onChange={handleInputChange} style={inputStyle(cores)} />
-                  <input name="whatsappMae" placeholder="WhatsApp da Mãe" onChange={handleInputChange} style={inputStyle(cores)} />
-                </div>
+                <input name="cpfRg" placeholder="CPF ou RG" onChange={handleInputChange} style={inputStyle(cores)} required />
+                <input name="whatsapp" placeholder="WhatsApp" onChange={handleInputChange} style={inputStyle(cores)} required />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <h3 style={{ color: cores.terraCota, fontSize: '16px', borderBottom: `1px solid ${cores.verdeClaro}`, paddingBottom: '5px' }}>🎓 PERFIL ACADÊMICO</h3>
-                <select name="nivelEnsino" onChange={handleInputChange} style={{ ...inputStyle(cores), appearance: 'none', cursor: 'pointer' }}>
-                  <option>Ensino Fundamental I / II</option>
-                  <option>Ensino Médio</option>
-                  <option>Graduação / Outros</option>
-                </select>
-                <input name="serie" placeholder="Qual série / ano?" onChange={handleInputChange} style={inputStyle(cores)} />
+                <h3 style={{ color: cores.terraCota, fontSize: '16px' }}>🎓 ACADÊMICO</h3>
                 <input name="ra" placeholder="Número do RA" onChange={handleInputChange} style={inputStyle(cores)} required />
-                <div style={{ backgroundColor: '#F0F0F5', padding: '20px', borderRadius: '20px', marginTop: '10px' }}>
-                  <h3 style={{ color: cores.verdeOliva, fontSize: '14px', marginBottom: '10px' }}>DADOS DA INSTITUIÇÃO</h3>
-                  <input name="escola" placeholder="Nome da Escola ou Faculdade" onChange={handleInputChange} style={{ ...inputStyle(cores), backgroundColor: '#fff', color: '#333' }} />
-                  <div style={{ display: 'flex', gap: '20px', margin: '10px 5px' }}>
-                    <label><input type="radio" name="tipoEscola" value="Público" onChange={handleInputChange} /> Público</label>
-                    <label><input type="radio" name="tipoEscola" value="Particular" onChange={handleInputChange} /> Particular</label>
-                  </div>
-                  <input name="telefoneEscola" placeholder="Telefone da Instituição" onChange={handleInputChange} style={{ ...inputStyle(cores), backgroundColor: '#fff', color: '#333' }} />
-                  <input name="enderecoEscola" placeholder="Endereço da Instituição" onChange={handleInputChange} style={{ ...inputStyle(cores), backgroundColor: '#fff', color: '#333' }} />
-                </div>
-                <div style={{ border: `2px solid ${cores.verdeClaro}`, padding: '15px', borderRadius: '20px', marginTop: '5px' }}>
+                <div style={{ border: `2px solid ${cores.gold}`, padding: '15px', borderRadius: '20px' }}>
                   <h3 style={{ color: cores.gold, fontSize: '14px', marginBottom: '5px' }}>CÓDIGO DE LIBERAÇÃO</h3>
-                  <input name="codigoLiberacao" placeholder="Insira o código aqui" onChange={handleInputChange} style={{ ...inputStyle(cores), backgroundColor: 'transparent', border: '1px solid #ccc', color: '#333' }} />
+                  <input name="codigoLiberacao" placeholder="Insira o código aqui" onChange={handleInputChange} style={{ ...inputStyle(cores), backgroundColor: '#fff', color: '#333', border: '1px solid #ccc' }} />
                 </div>
               </div>
             </div>
-            <button type="submit" style={{ ...btnMain(cores), background: cores.terraCota, marginTop: '30px' }}>
-              💾 FINALIZAR CADASTRO E ACESSAR
-            </button>
-            <footer style={{ marginTop: '30px', textAlign: 'center', borderTop: `1px solid ${cores.verdeClaro}`, paddingTop: '20px' }}>
-              <p style={{ margin: '0', fontSize: '13px', color: '#666' }}>Desenvolvido por <strong>Angela Cristina</strong> | Maio de 2026</p>
-            </footer>
+            <button type="submit" style={{ ...btnMain(cores), background: cores.terraCota, marginTop: '30px' }}>💾 FINALIZAR CADASTRO</button>
           </form>
         </div>
       )}
