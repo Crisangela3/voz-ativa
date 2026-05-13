@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+:root {
+  --color-bege: #f2e8d5;
+  --color-oliva: #7d8c69;
+  --color-terracota: #a65d37;
+  --color-gold: #c9a84c;
+}
+
+body {
+  background-color: var(--color-bege);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.pulse-ring {
+  animation: pulse-ring 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+  0%, 100% {
+    box-shadow: 0 0 0 0 #a65d3766;
+  }
+  50% {
+    box-shadow: 0 0 0 12px #a65d3700;
+  }
+}
+
+.transcript-area {
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 200px;
+}
