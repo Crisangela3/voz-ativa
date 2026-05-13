@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { jsPDF } from "jspdf"; // Importação necessária para o PDF funcionar
+import { jsPDF } from "jspdf";
 
 const App = () => {
   const [transcricao, setTranscricao] = useState("");
@@ -9,6 +9,11 @@ const App = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showAjuda, setShowAjuda] = useState(false);
   const [etapaCadastro, setEtapaCadastro] = useState("fechado");
+
+  // --- TRAVA DE SEGURANÇA ---
+  const [codigoAcessoInput, setCodigoAcessoInput] = useState("");
+  const [autorizado, setAutorizado] = useState(false);
+  const CODIGO_CORRETO = import.meta.env.VITE_FREE_ACCESS_CODE;
 
   const [dadosPerfil, setDadosPerfil] = useState({
     nomeAluno: "", cpfRg: "", whatsapp: "", cep: "", endereco: "", bairro: "", cidade: "",
@@ -28,7 +33,14 @@ const App = () => {
     cinzaTexto: "#333333"
   };
 
-  // --- FUNÇÃO PARA GERAR O PDF ---
+  const verificarCodigo = () => {
+    if (codigoAcessoInput === CODIGO_CORRETO) {
+      setAutorizado(true);
+    } else {
+      alert("Código de liberação inválido!");
+    }
+  };
+
   const gerarPDF = () => {
     if (!palavrasConfirmadas && !transcricao) {
       alert("Não há texto para gerar o PDF.");
@@ -36,42 +48,36 @@ const App = () => {
     }
     const doc = new jsPDF();
     const dataAtual = new Date().toLocaleDateString('pt-BR');
-    
     doc.setFontSize(22);
     doc.setTextColor(107, 112, 92);
     doc.text("Voz Ativa - Relatório de Aula", 20, 20);
-    
     doc.setFontSize(12);
     doc.setTextColor(51, 51, 51);
     doc.text(`Data: ${dataAtual} | Categoria: ${categoria}`, 20, 30);
     doc.line(20, 35, 190, 35);
-    
     doc.setFontSize(11);
     const textoCompleto = palavrasConfirmadas + " " + transcricao;
     const splitText = doc.splitTextToSize(textoCompleto, 170);
     doc.text(splitText, 20, 45);
-    
     doc.save(`Aula_VozAtiva_${dataAtual}.pdf`);
   };
 
   const enviarParaEmail = async (e) => {
     e.preventDefault();
     try {
-      // Enviando para o seu link do Formspree configurado para projeto.oucapormim@gmail.com
       const response = await fetch("https://formspree.io/f/mlgzpqga", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dadosPerfil),
       });
-
       if (response.ok) {
-        alert("Cadastro enviado com sucesso! Verifique seu e-mail para a mala direta.");
+        alert("Cadastro enviado com sucesso!");
         setEtapaCadastro("fechado");
       } else {
-        alert("Erro ao enviar. Tente novamente.");
+        alert("Erro ao enviar.");
       }
     } catch (error) {
-      alert("Erro de conexão com o servidor de e-mail.");
+      alert("Erro de conexão.");
     }
   };
 
@@ -82,9 +88,6 @@ const App = () => {
 
   const encerrarReconhecimento = () => {
     if (recognitionRef.current) {
-      recognitionRef.current.onresult = null;
-      recognitionRef.current.onend = null;
-      recognitionRef.current.onerror = null;
       recognitionRef.current.stop();
       recognitionRef.current = null;
     }
@@ -92,11 +95,26 @@ const App = () => {
 
   const iniciarReconhecimento = () => {
     const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
-    if (!SpeechRecognition) return;
+    if (!SpeechRecognition) {
+      alert("Navegador não suportado. Use o Chrome.");
+      return;
+    }
     const recognition = new SpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'pt-BR';
+
+    // --- DIAGNÓSTICO PARA O PC DA AMIGA ---
+    recognition.onerror = (event) => {
+      console.error("Erro:", event.error);
+      if (event.error === 'not-allowed') {
+        alert("ERRO: Microfone bloqueado! Clique no CADEADO ao lado da URL e permita o uso.");
+      } else {
+        alert("Erro no microfone: " + event.error);
+      }
+      setEstaGravando(false);
+    };
+
     recognition.onresult = (event) => {
       let transcriptInterim = "";
       let transcriptFinal = "";
@@ -107,7 +125,7 @@ const App = () => {
       setPalavrasConfirmadas(prev => prev + transcriptFinal);
       setTranscricao(transcriptInterim);
     };
-    recognition.onend = () => { if (estaGravando && recognitionRef.current) try { recognition.start(); } catch (e) {} };
+
     recognitionRef.current = recognition;
     recognition.start();
   };
@@ -116,6 +134,25 @@ const App = () => {
     if (estaGravando) { setEstaGravando(false); encerrarReconhecimento(); }
     else { setEstaGravando(true); iniciarReconhecimento(); }
   };
+
+  // TELA DE BLOQUEIO INICIAL
+  if (!autorizado) {
+    return (
+      <div style={{ backgroundColor: cores.begeFundo, height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ backgroundColor: '#fff', padding: '40px', borderRadius: '30px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', textAlign: 'center', width: '400px' }}>
+          <h2 style={{ color: cores.verdeOliva, marginBottom: '20px' }}>Liberação de Acesso</h2>
+          <input 
+            type="password" 
+            placeholder="Digite o código" 
+            style={{ ...inputStyle(cores), backgroundColor: '#f0f0f0', color: '#333', border: '1px solid #ccc' }}
+            value={codigoAcessoInput}
+            onChange={(e) => setCodigoAcessoInput(e.target.value)}
+          />
+          <button onClick={verificarCodigo} style={btnMain(cores)}>ENTRAR NO SISTEMA</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ backgroundColor: cores.begeFundo, height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden', position: 'fixed', top: 0, left: 0 }}>
@@ -159,7 +196,6 @@ const App = () => {
             </div>
             <div style={{ display: 'flex', gap: '20px', width: '100%' }}>
               <button style={{ flex: 1, backgroundColor: cores.gold, color: '#fff', border: 'none', padding: '22px', borderRadius: '20px', fontWeight: 'bold', fontSize: '20px' }}>SALVAR NO HISTÓRICO</button>
-              {/* ADICIONADO A FUNÇÃO DE PDF NO SEU BOTÃO */}
               <button onClick={gerarPDF} style={{ flex: 1, border: `2px solid ${cores.gold}`, color: cores.gold, background: '#fff', padding: '22px', borderRadius: '20px', fontWeight: 'bold', fontSize: '20px', cursor: 'pointer' }}>📄 GERAR PDF</button>
             </div>
           </div>
@@ -200,11 +236,11 @@ const App = () => {
               <div>
                 <h3 style={{ color: cores.gold, fontSize: '16px', marginBottom: '15px' }}>› REGRAS DO CADASTRO (IMPORTANTE)</h3>
                 <div style={{ backgroundColor: cores.begeFundo, padding: '20px', borderRadius: '20px', fontSize: '13px', border: `1px solid ${cores.gold}` }}>
-                   <ul style={{ paddingLeft: '20px', color: cores.cinzaTexto }}>
-                     <li><b>RA do Aluno:</b> Obrigatório número completo mais o dígito.</li>
-                     <li><b>Documentos:</b> CPF e RG devem estar completos.</li>
-                     <li><b>Código:</b> Digite o código recebido por e-mail para liberar todas as funções.</li>
-                   </ul>
+                    <ul style={{ paddingLeft: '20px', color: cores.cinzaTexto }}>
+                      <li><b>RA do Aluno:</b> Obrigatório número completo mais o dígito.</li>
+                      <li><b>Documentos:</b> CPF e RG devem estar completos.</li>
+                      <li><b>Código:</b> Digite o código recebido por e-mail para liberar todas as funções.</li>
+                    </ul>
                 </div>
               </div>
             </div>
@@ -233,7 +269,6 @@ const App = () => {
           <form onSubmit={enviarParaEmail} style={{ backgroundColor: cores.branco, width: '950px', borderRadius: '45px', padding: '40px', position: 'relative', border: `8px solid ${cores.terraCota}`, maxHeight: '90vh', overflowY: 'auto' }}>
             <button type="button" onClick={() => setEtapaCadastro("fechado")} style={closeBtn}>×</button>
             <h2 style={{ color: cores.verdeOliva, textAlign: 'center', fontSize: '28px', marginBottom: '30px', fontWeight: 'bold' }}>Perfil do Usuário</h2>
-            
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 <h3 style={{ color: cores.terraCota, fontSize: '16px', borderBottom: `1px solid ${cores.verdeClaro}`, paddingBottom: '5px' }}>👤 DADOS PESSOAIS</h3>
@@ -255,7 +290,6 @@ const App = () => {
                   <input name="whatsappMae" placeholder="WhatsApp da Mãe" onChange={handleInputChange} style={inputStyle(cores)} />
                 </div>
               </div>
-
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 <h3 style={{ color: cores.terraCota, fontSize: '16px', borderBottom: `1px solid ${cores.verdeClaro}`, paddingBottom: '5px' }}>🎓 PERFIL ACADÊMICO</h3>
                 <select name="nivelEnsino" onChange={handleInputChange} style={{ ...inputStyle(cores), appearance: 'none', cursor: 'pointer' }}>
@@ -281,11 +315,9 @@ const App = () => {
                 </div>
               </div>
             </div>
-
             <button type="submit" style={{ ...btnMain(cores), background: cores.terraCota, marginTop: '30px' }}>
               💾 FINALIZAR CADASTRO E ACESSAR
             </button>
-
             <footer style={{ marginTop: '30px', textAlign: 'center', borderTop: `1px solid ${cores.verdeClaro}`, paddingTop: '20px' }}>
               <p style={{ margin: '0', fontSize: '13px', color: '#666' }}>Desenvolvido por <strong>Angela Cristina</strong> | Maio de 2026</p>
             </footer>
