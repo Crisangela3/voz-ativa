@@ -15,14 +15,9 @@ O **Voz Ativa** é um assistente de transcrição em tempo real focado em acessi
 - **jsPDF**: Biblioteca para geração de documentos PDF.
 - **Formspree**: Serviço para gerenciamento de formulários e envio de e-mails.
 
-## 🚀 Como Rodar o Projeto Localmente
-1. Clone este repositório.
-2. Certifique-se de ter o Node.js instalado.
-3. No terminal, instale as dependências:
-   ```bash
-   npm install jspdf
 
-   Contato:
+
+ **Contato:
    LINKEDIN: www.linkedin.com/in/angela-cristina-silva-b40451108
    GITHUB: https://github.com/Crisangela3
    E-MAIL: projeto.oucapormim@gmail.com
