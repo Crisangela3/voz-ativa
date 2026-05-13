@@ -18,8 +18,11 @@ O **Voz Ativa** é um assistente de transcrição em tempo real focado em acessi
 
 
  **Contato:
+ 
    LINKEDIN: www.linkedin.com/in/angela-cristina-silva-b40451108
+   
    GITHUB: https://github.com/Crisangela3
+   
    E-MAIL: projeto.oucapormim@gmail.com
 
 # React + Vite
