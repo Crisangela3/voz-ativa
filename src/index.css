@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+/*
+  Paleta do Voz Ativa.
+  As cores são variáveis, então o modo "alto contraste" só troca os valores
+  abaixo (veja [data-contraste="alto"]) e a tela inteira acompanha.
+  Todas as combinações texto/fundo do tema padrão passam de 4.5:1 (WCAG AA).
+*/
+@theme {
+  --color-fundo: #f5ebe0;
+  --color-superficie: #ffffff;
+  --color-superficie-2: #eadcc9;
+  --color-borda: #a8906f;
+  --color-linha: #d2c1ac;
+  --color-cartao-borda: #e3d4c1;
+  --color-titulo: #a06030;
+  --color-faixa: #5f7259;
+  --color-faixa-texto: #ffffff;
+  --color-aviso-fundo: #fff4d6;
+  --color-aviso-borda: #e0b84a;
+  --color-texto: #5c3e21;
+  --color-texto-suave: #6e5339;
+  --color-primaria: #a36237;
+  --color-primaria-hover: #8c522e;
+  --color-primaria-texto: #ffffff;
+  --color-verde: #5f7259;
+  --color-verde-hover: #4f6049;
+  --color-verde-texto: #ffffff;
+  --color-perigo: #b3261e;
+  --color-destaque: #ffe9a8;
+  --color-destaque-texto: #4a2c00;
+  --color-foco: #1b5fd1;
+}
+
+[data-contraste="alto"] {
+  --color-fundo: #000000;
+  --color-superficie: #000000;
+  --color-superficie-2: #1a1a1a;
+  --color-borda: #ffffff;
+  --color-linha: #ffffff;
+  --color-cartao-borda: #ffffff;
+  --color-titulo: #ffd84d;
+  --color-faixa: #1a1a1a;
+  --color-faixa-texto: #ffffff;
+  --color-aviso-fundo: #1a1a1a;
+  --color-aviso-borda: #ffd84d;
+  --color-texto: #ffffff;
+  --color-texto-suave: #e6e6e6;
+  --color-primaria: #ffd84d;
+  --color-primaria-hover: #ffe98a;
+  --color-primaria-texto: #000000;
+  --color-verde: #8ce99a;
+  --color-verde-hover: #b2f2bb;
+  --color-verde-texto: #000000;
+  --color-perigo: #ff8a80;
+  --color-destaque: #ffd84d;
+  --color-destaque-texto: #000000;
+  --color-foco: #7fb6ff;
+}
+
+body {
+  background-color: var(--color-fundo);
+  color: var(--color-texto);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Foco sempre visível para quem navega pelo teclado */
+:focus-visible {
+  outline: 3px solid var(--color-foco);
+  outline-offset: 2px;
+}
+
+/* Respeita quem desativa animações no sistema */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Voz Ativa",
+  "short_name": "Voz Ativa",
+  "description": "Legendas ao vivo para aulas, consultas e conversas.",
+  "lang": "pt-BR",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5ebe0",
+  "theme_color": "#a36237",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
