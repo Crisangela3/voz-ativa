@@ -9,7 +9,7 @@
 
 ## Por que fiz este projeto
 
-Uma amiga surda acompanhava aulas de programação pelo Google Meet, mas a legenda automática era ruim e não entendia os termos técnicos que o professor falava: `if`, `else`, `while`, `true`. Ela perdia a aula.
+Uma amiga Deficiente Auditiva (surda), acompanhava aulas de programação pelo Google Meet, mas a legenda automática era ruim e não entendia os termos técnicos que o professor falava: `if`, `else`, `while`, `true`. Ela perdia a aula.
 
 O Voz Ativa resolve isso: transforma a fala em legenda grande e legível, corrige esses termos e destaca o código em cores. Também serve para consultas médicas, conversas presenciais e qualquer situação em que alguém precise ler o que está sendo dito.
 
