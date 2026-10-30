@@ -10,8 +10,8 @@ import { DOCUMENTOS, emailDeContato, enviarPedido, linkPedidoEmail, resumoDaCont
  * Tela inicial: "Cadastro do aluno" (pedido de acesso gratuito) ou "Tenho um código".
  * `expirado` mostra o motivo quando a avaliação ou o código acabou.
  */
-export default function TelaEntrada({ expirado, onCadastrar, onEntrar, onAtivarCodigo }) {
-  const [aba, setAba] = useState(expirado === 'codigo' || expirado === 'avaliacao' ? 'codigo' : 'cadastro')
+export default function TelaEntrada({ expirado, abaInicial, onVoltar, onCadastrar, onEntrar, onAtivarCodigo }) {
+  const [aba, setAba] = useState(abaInicial ?? (expirado === 'codigo' || expirado === 'avaliacao' ? 'codigo' : 'cadastro'))
   const [erro, setErro] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [enviado, setEnviado] = useState(null) // { dados, resultado }
@@ -43,6 +43,11 @@ export default function TelaEntrada({ expirado, onCadastrar, onEntrar, onAtivarC
   return (
     <main className="flex min-h-screen items-start justify-center bg-fundo p-4 sm:items-center">
       <div className={`w-full ${larga ? 'max-w-2xl' : 'max-w-md'} rounded-2xl border border-cartao-borda bg-superficie p-6 shadow-lg sm:p-8`}>
+        {onVoltar && (
+          <button type="button" onClick={onVoltar} className="mb-3 min-h-11 text-sm font-bold text-titulo underline">
+            ← Voltar e continuar testando o app
+          </button>
+        )}
         <h1 className="text-center text-3xl font-extrabold uppercase tracking-wider text-titulo">Voz Ativa</h1>
         <p className="mb-5 mt-1 text-center text-sm text-texto-suave">
           Legendas ao vivo para aulas, consultas e conversas

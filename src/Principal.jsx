@@ -29,7 +29,7 @@ import { baixarPDF, baixarTXT } from './utils/exportar'
 import { aplicarTermos, juntarTrecho } from './utils/termos'
 
 
-export default function Principal({ conta, status, onAtivarCodigo, onSalvarPerfil, onSair }) {
+export default function Principal({ conta, status, onAtivarCodigo, onSalvarPerfil, onSair, onAbrirEntrada }) {
   // Preferências e dados (ficam salvos neste aparelho)
   const [textoBruto, setTextoBruto] = useLocalStorage('vozativa:texto', '')
   const [categoria, setCategoria] = useLocalStorage('vozativa:categoria', 'Aulas')
@@ -470,6 +470,7 @@ export default function Principal({ conta, status, onAtivarCodigo, onSalvarPerfi
         onAtivarCodigo={onAtivarCodigo}
         onSalvarPerfil={onSalvarPerfil}
         onSair={onSair}
+        onAbrirEntrada={onAbrirEntrada}
       />
     </div>
   )

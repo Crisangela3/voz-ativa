@@ -8,7 +8,7 @@ import { CONTATO_EMAIL } from '../config'
 import { textoStatus } from '../utils/statusTexto'
 
 /** "Sua conta" e "Perfil do usuário" (abas Dados Pessoais e Acadêmico) na mesma janela. */
-export default function ModalConta({ aberto, onFechar, conta, status, onAtivarCodigo, onSalvarPerfil, onSair }) {
+export default function ModalConta({ aberto, onFechar, conta, status, onAtivarCodigo, onSalvarPerfil, onSair, onAbrirEntrada }) {
   const [vista, setVista] = useState('conta')
   const [aba, setAba] = useState('pessoais')
   const [codigo, setCodigo] = useState('')
@@ -117,6 +117,26 @@ export default function ModalConta({ aberto, onFechar, conta, status, onAtivarCo
             <button type="submit" className={`${botao.primario} flex-1`}>Salvar</button>
           </div>
         </form>
+      </Modal>
+    )
+  }
+
+  if (conta.visitante) {
+    return (
+      <Modal aberto={aberto} onFechar={fechar} titulo="Sua conta" idTitulo="titulo-conta">
+        <p className="mb-4 rounded-lg bg-faixa px-3 py-2 text-sm font-semibold text-faixa-texto">{textoStatus(status)}</p>
+        <p className="mb-4 text-sm leading-relaxed">
+          Você está testando o Voz Ativa como visitante. Para continuar depois dos 7 dias, peça o{' '}
+          <strong>acesso gratuito</strong> (estudantes que comprovam a necessidade) ou digite um código que já recebeu.
+        </p>
+        <div className="grid gap-2">
+          <button type="button" className={botao.primario} onClick={() => { fechar(); onAbrirEntrada('cadastro') }}>
+            Cadastrar e pedir acesso gratuito
+          </button>
+          <button type="button" className={botao.secundario} onClick={() => { fechar(); onAbrirEntrada('codigo') }}>
+            <KeyRound size={18} aria-hidden="true" /> Já tenho um código
+          </button>
+        </div>
       </Modal>
     )
   }

@@ -8,7 +8,7 @@
 // Para gerar um código: npm run codigo -- aluno@email.com
 // Troque o SAL abaixo por uma frase só sua ANTES de publicar (e não mostre a ninguém).
 
-export const SAL = 'cafe-com-leite-2026-pedagoga-de-sp-voz-ativa'
+export const SAL = 'voz-ativa-troque-esta-frase-antes-de-publicar'
 export const VALIDADE_DIAS = 180
 export const AVALIACAO_DIAS = 7
 

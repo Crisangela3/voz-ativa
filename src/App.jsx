@@ -1,20 +1,36 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Principal from './Principal'
 import TelaEntrada from './components/TelaEntrada'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import { emailValido, mesmoCodigo, normalizarEmail, statusConta, validarCodigo } from './utils/licenca'
 
+const VISITANTE = { nome: 'Visitante', email: '', visitante: true }
+
 /**
- * Porta de entrada: decide entre a tela de cadastro/código e o app.
+ * Porta de entrada. Quem chega pela primeira vez já cai no app, em avaliação de 7 dias
+ * (visitante). O cadastro e o código ficam a um toque, em "Sua conta".
  * Os cadastros ficam guardados por e-mail, assim sair e entrar de novo não reinicia
- * os 7 dias de avaliação nem o ano de acesso gratuito.
+ * a avaliação nem o período do código.
  */
 export default function App() {
   const [registros, setRegistros] = useLocalStorage('vozativa:registros', {})
   const [sessao, setSessao] = useLocalStorage('vozativa:sessao', null)
 
-  const conta = sessao ? registros[sessao] : null
-  const status = useMemo(() => statusConta(conta), [conta])
+  const [inicioVisita, setInicioVisita] = useLocalStorage('vozativa:inicio', null)
+  const [entrada, setEntrada] = useState(null) // null = app; 'cadastro' | 'codigo' = tela de entrada
+
+  // Marca o primeiro acesso: daí contam os 7 dias de avaliação do visitante
+  useEffect(() => {
+    if (!inicioVisita) setInicioVisita(new Date().toISOString())
+  }, [inicioVisita, setInicioVisita])
+
+  const contaCadastrada = sessao ? registros[sessao] : null
+  const conta = contaCadastrada ?? VISITANTE
+  const registroParaStatus = useMemo(
+    () => contaCadastrada ?? { cadastradoEm: inicioVisita ?? new Date().toISOString() },
+    [contaCadastrada, inicioVisita],
+  )
+  const status = useMemo(() => statusConta(registroParaStatus), [registroParaStatus])
 
   const cadastrar = useCallback(
     ({ nome, email, escola, dados }) => {
@@ -51,6 +67,7 @@ export default function App() {
       }
       setRegistros((todos) => ({ ...todos, [chave]: novo }))
       setSessao(chave)
+      setEntrada(null)
       return { ok: true }
     },
     [registros, setRegistros, setSessao],
@@ -61,13 +78,20 @@ export default function App() {
     [setRegistros, sessao],
   )
 
-  if (!conta || status.tipo === 'expirado') {
+  const entrar = (email) => {
+    setSessao(normalizarEmail(email))
+    setEntrada(null)
+  }
+
+  if (status.tipo === 'expirado' || entrada) {
     return (
       <TelaEntrada
-        key={status.motivo ?? 'novo'}
-        expirado={conta ? status.motivo : null}
+        key={`${status.motivo ?? 'novo'}-${entrada}`}
+        expirado={status.tipo === 'expirado' ? (contaCadastrada ? status.motivo : 'avaliacao') : null}
+        abaInicial={entrada}
+        onVoltar={status.tipo !== 'expirado' ? () => setEntrada(null) : null}
         onCadastrar={cadastrar}
-        onEntrar={(email) => setSessao(normalizarEmail(email))}
+        onEntrar={entrar}
         onAtivarCodigo={ativarCodigo}
       />
     )
@@ -80,6 +104,7 @@ export default function App() {
       onAtivarCodigo={ativarCodigo}
       onSalvarPerfil={salvarPerfil}
       onSair={() => setSessao(null)}
+      onAbrirEntrada={(aba) => setEntrada(aba)}
     />
   )
 }

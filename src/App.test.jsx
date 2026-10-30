@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { renderToString } from 'react-dom/server'
 import App from './App'
+import TelaEntrada from './components/TelaEntrada'
 import Principal from './Principal'
 import { gerarCodigo } from './utils/licenca'
 
@@ -9,8 +10,19 @@ const conta = { nome: 'Ana Souza', email: 'ana@escola.com', cadastradoEm: agora 
 const status = { tipo: 'avaliacao', dias: 7, ate: new Date() }
 const acoes = { onAtivarCodigo: () => ({ ok: true }), onSalvarPerfil: () => {}, onSair: () => {} }
 
+const semAcao = { onCadastrar: () => {}, onEntrar: () => {}, onAtivarCodigo: () => ({ ok: true }) }
+
+describe('Primeiro acesso', () => {
+  it('abre direto no app, em avaliação de 7 dias, sem exigir cadastro', () => {
+    const html = renderToString(<App />)
+    expect(html).toContain('Iniciar legendas e gravar')
+    expect(html).toContain('Período de avaliação: 7 dias restantes')
+    expect(html).not.toContain('Enviar pedido de acesso gratuito')
+  })
+})
+
 describe('Tela de entrada', () => {
-  const html = renderToString(<App />)
+  const html = renderToString(<TelaEntrada {...semAcao} />)
 
   it('mostra o cadastro do aluno e a entrada com código', () => {
     expect(html).toContain('Voz Ativa')
